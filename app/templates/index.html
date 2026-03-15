@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Customer Churn Prediction</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class='container'>
+        <h1>Customer Churn Prediction</h1>
+        <div class='example'>
+            <b>Example JSON:</b><br>
+            <pre>{
+  "points_in_wallet": 500.0,
+  "membership_category": "Gold Membership",
+  "avg_transaction_value": 10000.0,
+  "age": 30,
+  "feedback": "Reasonable Price",
+  "days_since_last_login": 5,
+  "avg_time_spent": 200.0,
+  "avg_frequency_login_days": 5,
+  "gender": "Male",
+  "internet_option": "Yes",
+  "offer_application_preference": "Yes",
+  "joining_date": "2023-01-01",
+  "last_visit_time": "12:00:00",
+  "joined_through_referral": "Yes",
+  "region_category": "Yes"
+}</pre>
+        </div>
+        <textarea id='jsonInput' placeholder='Paste your JSON here...'></textarea>
+        <button onclick='predict()'>Predict</button>
+        <div id='result' class='result' style='display:none;'></div>
+    </div>
+    <script>
+        function predict() {
+            const input = document.getElementById('jsonInput').value;
+            let jsonData;
+            try {
+                jsonData = JSON.parse(input);
+            } catch (e) {
+                showResult('Invalid JSON format!', true);
+                return;
+            }
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.prediction) {
+                    showResult('Prediction: ' + data.prediction, false);
+                } else {
+                    showResult('Error: ' + JSON.stringify(data), true);
+                }
+            })
+            .catch(err => showResult('Error: ' + err, true));
+        }
+        function showResult(msg, isError) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = msg;
+            if (isError) {
+                resultDiv.classList.add('error');
+            } else {
+                resultDiv.classList.remove('error');
+            }
+        }
+    </script>
+</body>
+</html> 
